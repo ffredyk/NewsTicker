@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 
 namespace NewsTicker
 {
-    public class DrawRecords : BaseDraw
+    public class DrawTicks : BaseDraw
     {
+        /*
         #region Record manipulation
 
         public class Record
@@ -27,10 +28,13 @@ namespace NewsTicker
             string text = "",
             params object[] args) => DrawRecords.Records.Add(new DrawRecords.Record() { title = title, color = color, text = string.Format(text, args) });
 
-        #endregion
+        #endregion*/
 
         public override void Draw()
         {
+            List<Tick> orderedTicks = new List<Tick>(Tick.Ticks);
+            orderedTicks.Sort((x, y) => DateTime.Compare(x.Stamp, y.Stamp));
+
             Line();
             Tab(1);
             Write("Start Time:");
@@ -51,7 +55,7 @@ namespace NewsTicker
             Tab(5);
             Write("Last activity:");
             Tab(8);
-            Write(Records[Records.Count - 1]?.when.ToLongTimeString() ?? DateTime.Now.ToLongTimeString());
+            Write(Tick.Ticks[Tick.Ticks.Count - 1]?.Stamp.ToLongTimeString() ?? DateTime.Now.ToLongTimeString());
             ///////
             /*Line();
             Tab(1);
@@ -68,15 +72,16 @@ namespace NewsTicker
             Line();
             Write(new string('-', Console.BufferWidth - 1)); //separator
 
-            if (Records.Count > 0)
+            if (Tick.Ticks.Count > 0)
             {
                 int start = Console.CursorTop + 1;
-                for (int i = Math.Max(Records.Count - (Console.WindowHeight - start), 0); i < Records.Count; i++)
+                for (int i = Math.Max(Tick.Ticks.Count - (Console.WindowHeight - start), 0); i < Tick.Ticks.Count; i++)
                 {
                     Line();
-                    Write("{0} {1}", ConsoleColor.Gray, Records[i].when.ToShortDateString(), Records[i].when.ToLongTimeString());
-                    Write(" {0}:", Records[i].color, Records[i].title);
-                    Write(" {0}", ConsoleColor.White, Records[i].text);
+                    Write("{0} {1}", ConsoleColor.Gray, Tick.Ticks[i].Stamp.ToShortDateString(), Tick.Ticks[i].Stamp.ToLongTimeString());
+                    Write(" [{0}]", ConsoleColor.Gray, Tick.Ticks[i].Source);
+                    Write(" {0}:", ConsoleColor.Red, Tick.Ticks[i].Title);
+                    Write(" {0}", ConsoleColor.White, Tick.Ticks[i].Body);
                     ClearFix();
                 }
             }

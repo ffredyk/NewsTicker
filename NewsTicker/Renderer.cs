@@ -78,6 +78,21 @@ namespace NewsTicker
         {
             Console.ResetColor();
             Console.ForegroundColor = color;
+            Console.BackgroundColor = ConsoleColor.Black;
+
+            string output = string.Format(text, args);
+
+            int space = Console.BufferWidth - (Console.CursorLeft + 1);
+            if (output.Length > space) output = output.Substring(0, space - 4) + "...";
+
+            Console.Write(output);
+        }
+
+        public static void WriteInvert(string text = "", ConsoleColor color = ConsoleColor.White, params object[] args)
+        {
+            Console.ResetColor();
+            Console.BackgroundColor = color;
+            Console.ForegroundColor = ConsoleColor.Black;
 
             string output = string.Format(text, args);
 
