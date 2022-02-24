@@ -20,7 +20,7 @@ namespace NewsTicker
 
             string output = string.Format(text, args);
 
-            int space = Console.BufferWidth - (Console.CursorLeft + 1);
+            int space = Console.WindowWidth - (Console.CursorLeft + 1);
             if (output.Length > space) output = output.Substring(0, space - 4) + "...";
 
             Console.Write(output);
@@ -34,7 +34,7 @@ namespace NewsTicker
 
             string output = string.Format(text, args);
 
-            int space = Console.BufferWidth - (Console.CursorLeft + 1);
+            int space = Console.WindowWidth - (Console.CursorLeft + 1);
             if (output.Length > space) output = output.Substring(0, space - 4) + "...";
 
             Console.Write(output);

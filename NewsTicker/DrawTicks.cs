@@ -33,7 +33,7 @@ namespace NewsTicker
         public override void Draw()
         {
             List<Tick> orderedTicks = new List<Tick>(Tick.Ticks);
-            orderedTicks.Sort((x, y) => DateTime.Compare(x.Stamp, y.Stamp));
+            orderedTicks.Sort((x, y) => DateTime.Compare(x.Stamp, y.Stamp)*-1);
 
             Line();
             Tab(1);
@@ -55,7 +55,7 @@ namespace NewsTicker
             Tab(5);
             Write("Last activity:");
             Tab(8);
-            Write(Tick.Ticks[Tick.Ticks.Count - 1]?.Stamp.ToLongTimeString() ?? DateTime.Now.ToLongTimeString());
+            Write(orderedTicks[orderedTicks.Count - 1]?.Stamp.ToLongTimeString() ?? DateTime.Now.ToLongTimeString());
             ///////
             /*Line();
             Tab(1);
@@ -72,16 +72,16 @@ namespace NewsTicker
             Line();
             Write(new string('-', Console.BufferWidth - 1)); //separator
 
-            if (Tick.Ticks.Count > 0)
+            if (orderedTicks.Count > 0)
             {
                 int start = Console.CursorTop + 1;
-                for (int i = Math.Max(Tick.Ticks.Count - (Console.WindowHeight - start), 0); i < Tick.Ticks.Count; i++)
+                for (int i = 0; i < (Console.WindowHeight - start); i++)
                 {
                     Line();
-                    Write("{0} {1}", ConsoleColor.Gray, Tick.Ticks[i].Stamp.ToShortDateString(), Tick.Ticks[i].Stamp.ToLongTimeString());
-                    Write(" [{0}]", ConsoleColor.Gray, Tick.Ticks[i].Source);
-                    Write(" {0}:", ConsoleColor.Red, Tick.Ticks[i].Title);
-                    Write(" {0}", ConsoleColor.White, Tick.Ticks[i].Body);
+                    Write("{0} {1}", ConsoleColor.Gray, orderedTicks[i].Stamp.ToShortDateString(), orderedTicks[i].Stamp.ToLongTimeString());
+                    Write(" [{0}]", ConsoleColor.Gray, orderedTicks[i].Source.Substring(0,(int)MathF.Min(orderedTicks[i].Source.Length,20)));
+                    Write(" {0}:", ConsoleColor.Red, orderedTicks[i].Title.Replace("\n", ""));
+                    if((Console.WindowWidth - Console.CursorLeft) >= 10) Write(" {0}", ConsoleColor.White, orderedTicks[i].Body.Replace("\n", ""));
                     ClearFix();
                 }
             }

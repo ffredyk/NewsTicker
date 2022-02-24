@@ -12,8 +12,8 @@ namespace NewsTicker
         {
             Console.WriteLine("Hello World!");
 
+            RssFeeder ct = new RssFeeder("CT24", "https://ct24.ceskatelevize.cz/rss/hlavni-zpravy");
             RssFeeder idnes = new RssFeeder("iDNES", "https://servis.idnes.cz/rss.aspx?c=zpravodaj");
-            //RssFeeder ct = new RssFeeder("CT24","https://ct24.ceskatelevize.cz/rss/hlavni-zpravy");
 
             //Loops
             var displayLoop = Task.Factory.StartNew(() => Renderer.DrawLoop(new DrawTicks()), TaskCreationOptions.LongRunning);
