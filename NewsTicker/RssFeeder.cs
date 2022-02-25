@@ -15,7 +15,7 @@ namespace NewsTicker
         public bool KeepAlive = true;
         public Task UpdateLooper;
 
-        public string[] invalidTags = new string[]
+        private string[] invalidTags = new string[]
         {
             "<![CDATA[ ]]>",
             "<![CDATA[",
