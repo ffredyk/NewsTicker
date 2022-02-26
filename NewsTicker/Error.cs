@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace NewsTicker
 {
-    public class Tick
+    public class Error
     {
         public string Title = "";
         public string URL = "";
@@ -15,6 +15,6 @@ namespace NewsTicker
         public string Source = "";
 
         public static event EventHandler OnTickUpdate;
-        public static List<Tick> Ticks = new List<Tick>();
+        public static List<Error> Ticks = new List<Error>();
     }
 }

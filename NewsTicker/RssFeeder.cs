@@ -12,8 +12,6 @@ namespace NewsTicker
     public class RssFeeder : BaseFeeder
     {
         public string RssSource = "";
-        public bool KeepAlive = true;
-        public Task UpdateLooper;
 
         private string[] invalidTags = new string[]
         {
@@ -51,9 +49,9 @@ namespace NewsTicker
                         parsednode.Add(subnode.Name, subnode.InnerText);
                     }
 
-                    if (Tick.Ticks.Find(x => x.Title == parsednode["title"]) is not null) continue;
+                    if (Error.Ticks.Find(x => x.Title == parsednode["title"]) is not null) continue;
 
-                    var tick = new Tick()
+                    var tick = new Error()
                     {
                         Title = parsednode["title"],
                         URL = parsednode["link"],
@@ -61,22 +59,9 @@ namespace NewsTicker
                         Stamp = DateTime.Parse(parsednode["pubDate"]),
                         Source = Identifier,
                     };
-                    Tick.Ticks.Add(tick);
+                    Error.Ticks.Add(tick);
                 }
             }
-        }
-
-        private async Task UpdateLoop()
-        {
-            KeepAlive = true;
-
-            while (KeepAlive)
-            {
-                await FetchUpdatesAsync();
-                await Task.Delay(1000*60);
-            }
-
-            KeepAlive = false;
         }
     }
 }

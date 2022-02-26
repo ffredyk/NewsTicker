@@ -11,6 +11,9 @@ namespace NewsTicker
         public List<string> FeedURLs;
         public DateTime LastUpdate;
 
+        public bool KeepAlive = true;
+        public Task UpdateLooper;
+
         public string Identifier;
 
         public virtual void FetchUpdates()
@@ -20,6 +23,19 @@ namespace NewsTicker
 
         public async virtual Task FetchUpdatesAsync()
         {
+        }
+
+        protected async Task UpdateLoop()
+        {
+            KeepAlive = true;
+
+            while (KeepAlive)
+            {
+                await FetchUpdatesAsync();
+                await Task.Delay(1000 * 60);
+            }
+
+            KeepAlive = false;
         }
     }
 }

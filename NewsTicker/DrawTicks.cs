@@ -32,7 +32,7 @@ namespace NewsTicker
 
         public override void Draw()
         {
-            List<Tick> orderedTicks = new List<Tick>(Tick.Ticks);
+            List<Error> orderedTicks = new List<Error>(Error.Ticks);
             orderedTicks.Sort((x, y) => DateTime.Compare(x.Stamp, y.Stamp)*-1);
 
             Line();

@@ -11,6 +11,22 @@ namespace NewsTicker
 {
     public static class GlobalData
     {
+        public class Source
+        {
+            public enum SourceType
+            {
+                Undefined = 0,
+                RSS = 1,
+                Twitter = 2,
+                Web = 3,
+            }
+            public SourceType Type;
+
+            public string Identificator;
+            public string Query;
+            public dynamic Parameters;
+        }
+
         public static class TwitterSettings
         {
             public static string APIKey = "";
@@ -22,6 +38,7 @@ namespace NewsTicker
         }
 
         public static bool Loaded = false;
+        public static List<Source> Sources = new List<Source>();
 
         public static void LoadFile()
         {
@@ -31,12 +48,34 @@ namespace NewsTicker
             var cfg = File.ReadAllText(path);
             dynamic vals = JObject.Parse(cfg);
 
-            TwitterSettings.APIKey =           vals.twitter.api_key ?? "";
-            TwitterSettings.APISecret =        vals.twitter.api_secret ?? "";
-            TwitterSettings.AccessToken =      vals.twitter.access_token ?? "";
-            TwitterSettings.AccessSecret =     vals.twitter.access_secret ?? "";
-            TwitterSettings.BEARER =           vals.twitter.bearer ?? "";
-            TwitterSettings.MaxPosts =         vals.twitter.max_posts ?? 10;
+            if (vals.sources is not null)
+            {
+                foreach (var src in vals.sources)
+                {
+                    var type = Source.SourceType.Undefined;
+                    if (src.type == "rss") type = Source.SourceType.RSS;
+                    if (src.type == "twitter") type = Source.SourceType.Twitter;
+                    if (src.type == "web") type = Source.SourceType.Web;
+
+                    Sources.Add(new Source()
+                    {
+                        Type = type,
+                        Identificator = src.id,
+                        Query = src.query,
+                        Parameters = src.args
+                    });
+                }
+            }
+
+            if (vals.twitter is not null)
+            {
+                TwitterSettings.APIKey = vals.twitter.api_key ?? "";
+                TwitterSettings.APISecret = vals.twitter.api_secret ?? "";
+                TwitterSettings.AccessToken = vals.twitter.access_token ?? "";
+                TwitterSettings.AccessSecret = vals.twitter.access_secret ?? "";
+                TwitterSettings.BEARER = vals.twitter.bearer ?? "";
+                TwitterSettings.MaxPosts = vals.twitter.max_posts ?? 10;
+            }
 
             Loaded = true;
         }

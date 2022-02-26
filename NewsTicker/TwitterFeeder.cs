@@ -17,8 +17,6 @@ namespace NewsTicker
     {
         public string TwitterQuery = "";
         public Tweetinvi.Models.LanguageFilter Language;
-        public bool KeepAlive = true;
-        public Task UpdateLooper;
 
         public TwitterClient client;
 
@@ -83,10 +81,10 @@ namespace NewsTicker
                     foreach (var t in tweets)
                     {
                         if (t.RetweetCount < 500) continue;
-                        if (Tick.Ticks.Find(x => x.Title == t.CreatedBy.ScreenName) is not null) continue;
+                        if (Error.Ticks.Find(x => x.Title == t.CreatedBy.ScreenName) is not null) continue;
                         if (++limiter > GlobalData.TwitterSettings.MaxPosts) break;
 
-                        var tick = new Tick()
+                        var tick = new Error()
                         {
                             Title = t.CreatedBy.ScreenName,
                             URL = string.Format("https://twitter.com/{0}/status/{1}", t.CreatedBy.ScreenName, t.Id),
@@ -94,27 +92,14 @@ namespace NewsTicker
                             Stamp = t.CreatedAt.DateTime.AddHours(1),
                             Source = Identifier,
                         };
-                        Tick.Ticks.Add(tick);
+                        Error.Ticks.Add(tick);
                     }
                 }
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                DrawLog.LogError(e);
             }
-        }
-
-        private async Task UpdateLoop()
-        {
-            KeepAlive = true;
-
-            while (KeepAlive)
-            {
-                await FetchUpdatesAsync();
-                await Task.Delay(1000*60);
-            }
-
-            KeepAlive = false;
         }
     }
 }

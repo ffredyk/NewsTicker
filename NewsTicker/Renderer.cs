@@ -17,10 +17,16 @@ namespace NewsTicker
 
         public static BaseDraw CurrentDraw;
 
+        private static int windowX;
+        private static int windowY;
+
         public async static Task DrawLoop(BaseDraw InitialDraw)
         {
             Enabled = true;
             Console.Clear();
+
+            windowX = Console.WindowWidth;
+            windowY = Console.WindowHeight;
 
             CurrentDraw = InitialDraw;
 
@@ -39,6 +45,7 @@ namespace NewsTicker
         {
             try
             {
+                ResizeCheck();
                 //Clear();
                 Console.SetCursorPosition(0, 0);
                 if (clearer++ % 100 == 0) Console.Clear();
@@ -62,6 +69,15 @@ namespace NewsTicker
                 /*Logger.Log("[RENDERER]", ConsoleColor.Red, "Crashed! {0}: {1}", e.Source, e.Message);
                 Logger.Log("[STACKTRACE]", ConsoleColor.DarkRed, e.StackTrace);*/
             }
+        }
+
+        public static void ResizeCheck()
+        {
+            if (windowX == Console.WindowWidth || windowY == Console.WindowHeight) return;
+
+            windowX = Console.WindowWidth;
+            windowY = Console.WindowHeight;
+            Console.Clear();
         }
 
         public static void Clear()

@@ -1,6 +1,7 @@
 ﻿using HtmlAgilityPack;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -17,8 +18,6 @@ namespace NewsTicker
         public string XPathText = "";
         public string XPathTitle = "";
         public string XPathTime = "";
-        public bool KeepAlive = true;
-        public Task UpdateLooper;
 
         private string[] invalidTags = new string[]
         {
@@ -41,44 +40,47 @@ namespace NewsTicker
 
         public async override Task FetchUpdatesAsync()
         {
-            using HttpClient web = new HttpClient();
-
-            var result = await web.GetStringAsync(WebSource);
-            //foreach (string tag in invalidTags) result = result.Replace(tag, "");
-            HtmlDocument doc = new HtmlDocument();
-            doc.LoadHtml(result);
-
-            var nodes = doc.DocumentNode.SelectNodes(XPathArticle);
-            foreach(var node in nodes)
+            try
             {
-                var title = node.SelectSingleNode(XPathTitle)?.InnerText ?? "";
-                var text = node.SelectSingleNode(XPathText)?.InnerText ?? "";
+                using HttpClient web = new HttpClient();
+                var result = "";
 
-                if (Tick.Ticks.Find(x => x.Body == text) is not null) continue;
-
-                var tick = new Tick()
+                //encoding fail tempfix
+                try { result = await web.GetStringAsync(WebSource); }
+                catch
                 {
-                    Title = title,
-                    URL = WebSource,
-                    Body = text,
-                    Stamp = DateTime.Parse(node.SelectSingleNode(XPathTime)?.InnerText ?? DateTime.Now.ToString()),
-                    Source = Identifier,
-                };
-                Tick.Ticks.Add(tick);
+                    var res = await web.GetAsync(WebSource);
+                    using var sr = new StreamReader(await res.Content.ReadAsStreamAsync(), Encoding.GetEncoding("windows-1250"));
+                    result = sr.ReadToEnd();
+                }
+
+                //foreach (string tag in invalidTags) result = result.Replace(tag, "");
+                HtmlDocument doc = new HtmlDocument();
+                doc.LoadHtml(result);
+
+                var nodes = doc.DocumentNode.SelectNodes(XPathArticle);
+                foreach (var node in nodes)
+                {
+                    var title = node.SelectSingleNode(XPathTitle)?.InnerText ?? "";
+                    var text = node.SelectSingleNode(XPathText)?.InnerText ?? "";
+
+                    if (Error.Ticks.Find(x => x.Body == text) is not null) continue;
+
+                    var tick = new Error()
+                    {
+                        Title = title,
+                        URL = WebSource,
+                        Body = text,
+                        Stamp = DateTime.Parse(node.SelectSingleNode(XPathTime)?.InnerText ?? DateTime.Now.ToString()),
+                        Source = Identifier,
+                    };
+                    Error.Ticks.Add(tick);
+                }
             }
-        }
-
-        private async Task UpdateLoop()
-        {
-            KeepAlive = true;
-
-            while (KeepAlive)
+            catch (Exception e)
             {
-                await FetchUpdatesAsync();
-                await Task.Delay(1000*60);
+                DrawLog.LogError(e);
             }
-
-            KeepAlive = false;
         }
     }
 }
