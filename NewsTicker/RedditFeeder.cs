@@ -117,15 +117,19 @@ namespace NewsTicker
                         var content = new HtmlDocument();
                         content.LoadHtml(parsednode["content"]);
 
-                        try
+                        var href = content.DocumentNode.SelectSingleNode("//a[starts-with(@href,'https://twitter.com/')]");
+                        if (href is null)
                         {
-                            var href = content.DocumentNode.SelectSingleNode("//a[starts-with(@href,'https://twitter.com/')]");
-                            var id = href.Attributes["href"].Value.Split("/")[5];
+                            href = content.DocumentNode.SelectSingleNode("//div");
+                            parsednode["content"] = href.InnerText;
+                        }
+                        else
+                        {
+                            var id = href.Attributes["href"].Value.Split("/")[5].Substring(0,19);
                             var tweet = await TwitterFeeder.GetTweetInfo(long.Parse(id));
                             parsednode["content"] = tweet.FullText;
                             title = tweet.CreatedBy.ScreenName;
                         }
-                        catch { }
 
 
                         var tick = new Tick()
