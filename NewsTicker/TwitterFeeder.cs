@@ -29,7 +29,7 @@ namespace NewsTicker
                 TwitterQuery = query;
                 Language = lang;
 
-                if (!GlobalData.Loaded) return;
+                if (!GlobalData.Loaded || GlobalData.TwitterSettings.APIKey.Length == 0) return;
 
                 if(client is null) 
                     client = new TwitterClient(GlobalData.TwitterSettings.APIKey, GlobalData.TwitterSettings.APISecret, GlobalData.TwitterSettings.AccessToken, GlobalData.TwitterSettings.AccessSecret);
