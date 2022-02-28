@@ -52,17 +52,18 @@ namespace NewsTicker
                     var text = doc.DocumentNode.SelectSingleNode(XPathText)?.InnerText ?? "";
 
                     //if (counter++ >= hardlimit) break;
-                    if (Error.Ticks.Find(x => x.Body == text) is not null) continue;
+                    if (!(Tick.Ticks.Find(x => x.Hash == title.Hash()) is null)) continue;
 
-                    var tick = new Error()
+                    var tick = new Tick()
                     {
                         Title = title,
                         URL = JsonSource,
                         Body = text,
                         Stamp = DateTime.Parse(doc.DocumentNode.SelectSingleNode(XPathTime)?.InnerText ?? DateTime.Now.ToString()),
                         Source = Identifier,
+                        Hash = title.Hash()
                     };
-                    Error.Ticks.Add(tick);
+                    Tick.Ticks.Add(tick);
                 }
             }
             catch(Exception e)

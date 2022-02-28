@@ -19,6 +19,8 @@ namespace NewsTicker
                 RSS = 1,
                 Twitter = 2,
                 Web = 3,
+                JsonWeb = 4,
+                Reddit = 5,
             }
             public SourceType Type;
 
@@ -42,42 +44,51 @@ namespace NewsTicker
 
         public static void LoadFile()
         {
-            string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + Path.DirectorySeparatorChar + "ticker.cfg";
-            if (!File.Exists(path)) return;
+            try
+            { 
+                string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + Path.DirectorySeparatorChar + "ticker.cfg";
+                if (!File.Exists(path)) return;
 
-            var cfg = File.ReadAllText(path);
-            dynamic vals = JObject.Parse(cfg);
+                var cfg = File.ReadAllText(path);
+                dynamic vals = JObject.Parse(cfg);
 
-            if (vals.sources is not null)
-            {
-                foreach (var src in vals.sources)
+                if (!(vals.sources is null))
                 {
-                    var type = Source.SourceType.Undefined;
-                    if (src.type == "rss") type = Source.SourceType.RSS;
-                    if (src.type == "twitter") type = Source.SourceType.Twitter;
-                    if (src.type == "web") type = Source.SourceType.Web;
-
-                    Sources.Add(new Source()
+                    foreach (var src in vals.sources)
                     {
-                        Type = type,
-                        Identificator = src.id,
-                        Query = src.query,
-                        Parameters = src.args
-                    });
+                        var type = Source.SourceType.Undefined;
+                        if (src.type == "rss") type = Source.SourceType.RSS;
+                        if (src.type == "twitter") type = Source.SourceType.Twitter;
+                        if (src.type == "web") type = Source.SourceType.Web;
+                        if (src.type == "jsonweb") type = Source.SourceType.JsonWeb;
+                        if (src.type == "reddit") type = Source.SourceType.Reddit;
+
+                        Sources.Add(new Source()
+                        {
+                            Type = type,
+                            Identificator = src.id,
+                            Query = src.query,
+                            Parameters = src.args
+                        });
+                    }
                 }
-            }
 
-            if (vals.twitter is not null)
+                if (!(vals.twitter is null))
+                {
+                    TwitterSettings.APIKey = vals.twitter.api_key ?? "";
+                    TwitterSettings.APISecret = vals.twitter.api_secret ?? "";
+                    TwitterSettings.AccessToken = vals.twitter.access_token ?? "";
+                    TwitterSettings.AccessSecret = vals.twitter.access_secret ?? "";
+                    TwitterSettings.BEARER = vals.twitter.bearer ?? "";
+                    TwitterSettings.MaxPosts = vals.twitter.max_posts ?? 10;
+                }
+
+                Loaded = true;
+            }
+            catch (Exception e)
             {
-                TwitterSettings.APIKey = vals.twitter.api_key ?? "";
-                TwitterSettings.APISecret = vals.twitter.api_secret ?? "";
-                TwitterSettings.AccessToken = vals.twitter.access_token ?? "";
-                TwitterSettings.AccessSecret = vals.twitter.access_secret ?? "";
-                TwitterSettings.BEARER = vals.twitter.bearer ?? "";
-                TwitterSettings.MaxPosts = vals.twitter.max_posts ?? 10;
+                DrawLog.LogError(e);
             }
-
-            Loaded = true;
         }
     }
 }

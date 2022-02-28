@@ -12,6 +12,39 @@ namespace NewsTicker
         {
         }
 
+        #region Screen input handlers
+
+        public int CurrentSelection = 0;
+
+        public virtual bool OnKeyPress(ConsoleKeyInfo key)
+        {
+            if (key.Key == ConsoleKey.Enter)
+                OnSelected();
+            else if (key.Key == ConsoleKey.Spacebar)
+                OnBack();
+
+            else if (key.Key == ConsoleKey.UpArrow)
+                CurrentSelection--;
+            else if (key.Key == ConsoleKey.DownArrow)
+                CurrentSelection++;
+            else return false;
+
+            CurrentSelection = (int)MathF.Max(CurrentSelection, 0);
+            Renderer.Draw();
+
+            return true;
+        }
+
+        public virtual void OnSelected()
+        { }
+
+        public virtual void OnBack()
+        { }
+
+        #endregion
+
+        #region Console draw methods
+
         protected void Write(string text = "", ConsoleColor color = ConsoleColor.White, params object[] args)
         {
             Console.ResetColor();
@@ -21,7 +54,8 @@ namespace NewsTicker
             string output = string.Format(text, args);
 
             int space = Console.WindowWidth - (Console.CursorLeft + 1);
-            if (output.Length > space) output = output.Substring(0, space - 4) + "...";
+            if (space < 1) return;
+            if (output.Length > space) output = output.Substring(0, (int)MathF.Max(space - 4, 0)) + "...";
 
             Console.Write(output);
         }
@@ -35,6 +69,7 @@ namespace NewsTicker
             string output = string.Format(text, args);
 
             int space = Console.WindowWidth - (Console.CursorLeft + 1);
+            if (space < 1) return;
             //if (output.Length > space) output = output.Substring(0, space - 4) + "...";
 
             Console.Write(output);
@@ -49,7 +84,7 @@ namespace NewsTicker
             string output = string.Format(text, args);
 
             int space = Console.WindowWidth - (Console.CursorLeft + 1);
-            if (output.Length > space) output = output.Substring(0, space - 4) + "...";
+            if (output.Length > space) output = output.Substring(0, (int)MathF.Max(space - 4, 0)) + "...";
 
             Console.Write(output);
         }
@@ -59,7 +94,9 @@ namespace NewsTicker
             if (index > 0) index *= 10;
             else index = Console.CursorLeft + 10;
 
-            Console.SetCursorPosition(index, Console.CursorTop);
+            //if (index > Console.WindowLeft) return;
+
+            Console.SetCursorPosition((int)MathF.Min(index,Console.WindowWidth), Console.CursorTop);
         }
 
         protected void Line()
@@ -72,5 +109,7 @@ namespace NewsTicker
         {
             Console.Write(new string(' ', Console.BufferWidth - (Console.CursorLeft + 1)));
         }
+
+        #endregion
     }
 }

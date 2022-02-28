@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Serialization;
 using Tweetinvi;
+using Tweetinvi.Models;
 using Tweetinvi.Parameters;
 using Tweetinvi.Parameters.V2;
 
@@ -18,29 +19,37 @@ namespace NewsTicker
         public string TwitterQuery = "";
         public Tweetinvi.Models.LanguageFilter Language;
 
-        public TwitterClient client;
+        public static TwitterClient client;
 
         public TwitterFeeder(string identifier, string query, Tweetinvi.Models.LanguageFilter lang = Tweetinvi.Models.LanguageFilter.English)
         {
-            Identifier = identifier;
-            TwitterQuery = query;
-            Language = lang;
-
-            if (!GlobalData.Loaded) return;
-
-            client = new TwitterClient(GlobalData.TwitterSettings.APIKey, GlobalData.TwitterSettings.APISecret, GlobalData.TwitterSettings.AccessToken, GlobalData.TwitterSettings.AccessSecret);
-
-            /*var stream = client.Streams.CreateFilteredStream(new CreateFilteredTweetStreamParameters()
+            try
             {
-                CustomQueryParameters = new List<Tuple<string, string>>()
-                {
-                    ""
-                }
-            });*/
-            
+                Identifier = identifier;
+                TwitterQuery = query;
+                Language = lang;
 
-            Task.Run(() => FetchUpdatesAsync());
-            UpdateLooper = Task.Factory.StartNew(() => UpdateLoop(), TaskCreationOptions.LongRunning);
+                if (!GlobalData.Loaded) return;
+
+                if(client is null) 
+                    client = new TwitterClient(GlobalData.TwitterSettings.APIKey, GlobalData.TwitterSettings.APISecret, GlobalData.TwitterSettings.AccessToken, GlobalData.TwitterSettings.AccessSecret);
+
+                /*var stream = client.Streams.CreateFilteredStream(new CreateFilteredTweetStreamParameters()
+                {
+                    CustomQueryParameters = new List<Tuple<string, string>>()
+                    {
+                        ""
+                    }
+                });*/
+
+
+                Task.Run(() => FetchUpdatesAsync());
+                UpdateLooper = Task.Factory.StartNew(() => UpdateLoop(), TaskCreationOptions.LongRunning);
+            }
+            catch (Exception e)
+            {
+                DrawLog.LogError(e);
+            }
         }
 
         public async override Task FetchUpdatesAsync()
@@ -65,9 +74,11 @@ namespace NewsTicker
                 {
                     TweetMode = TweetMode.Extended,
                     Lang = Language,
-                    SearchType = Tweetinvi.Models.SearchResultType.Popular,
+                    SearchType = Tweetinvi.Models.SearchResultType.Mixed,
                     Locale = "cs",
                     IncludeEntities = true,
+                    Since = DateTime.Now.Subtract(TimeSpan.FromMinutes(2)),
+                    PageSize = 10
                     /*CustomQueryParameters =
                     {
                         new Tuple<string, string>("tweet.fields", "public_metrics,created_at,author_id,like_count,public_metrics.like_count"),
@@ -80,19 +91,20 @@ namespace NewsTicker
                 {
                     foreach (var t in tweets)
                     {
-                        if (t.RetweetCount < 500) continue;
-                        if (Error.Ticks.Find(x => x.Title == t.CreatedBy.ScreenName) is not null) continue;
+                        if (t.RetweetCount < 1000) continue;
+                        if (!(Tick.Ticks.Find(x => x.Hash == t.Text.Hash()) is  null)) continue;
                         if (++limiter > GlobalData.TwitterSettings.MaxPosts) break;
 
-                        var tick = new Error()
+                        var tick = new Tick()
                         {
                             Title = t.CreatedBy.ScreenName,
                             URL = string.Format("https://twitter.com/{0}/status/{1}", t.CreatedBy.ScreenName, t.Id),
-                            Body = t.Text,
+                            Body = t.FullText,
                             Stamp = t.CreatedAt.DateTime.AddHours(1),
                             Source = Identifier,
+                            Hash = t.Text.Hash()
                         };
-                        Error.Ticks.Add(tick);
+                        Tick.Ticks.Add(tick);
                     }
                 }
             }
@@ -100,6 +112,11 @@ namespace NewsTicker
             {
                 DrawLog.LogError(e);
             }
+        }
+
+        public static async Task<ITweet> GetTweetInfo(long id)
+        {
+            return await client.Tweets.GetTweetAsync(id);
         }
     }
 }

@@ -30,37 +30,45 @@ namespace NewsTicker
 
         public async override Task FetchUpdatesAsync()
         {
-            using HttpClient web = new HttpClient();
+            try
+            { 
+                using HttpClient web = new HttpClient();
 
-            var result = await web.GetStringAsync(RssSource);
-            //foreach (string tag in invalidTags) result = result.Replace(tag, "");
-            var xmlDoc = new XmlDocument();
-            xmlDoc.LoadXml(result);
+                var result = await web.GetStringAsync(RssSource);
+                //foreach (string tag in invalidTags) result = result.Replace(tag, "");
+                var xmlDoc = new XmlDocument();
+                xmlDoc.LoadXml(result);
 
-            foreach (XmlNode node in xmlDoc.DocumentElement.ChildNodes[0])
-            {
-
-                //if (counter++ >= hardlimit) break;
-                if (node.Name == "item")
+                foreach (XmlNode node in xmlDoc.DocumentElement.ChildNodes[0])
                 {
-                    Dictionary<string, string> parsednode = new Dictionary<string, string>();
-                    foreach (XmlNode subnode in node)
+
+                    //if (counter++ >= hardlimit) break;
+                    if (node.Name == "item")
                     {
-                        parsednode.Add(subnode.Name, subnode.InnerText);
+                        Dictionary<string, string> parsednode = new Dictionary<string, string>();
+                        foreach (XmlNode subnode in node)
+                        {
+                            parsednode.Add(subnode.Name, subnode.InnerText);
+                        }
+
+                        if (!(Tick.Ticks.Find(x => x.Hash == parsednode["title"].Hash()) is null)) continue;
+
+                        var tick = new Tick()
+                        {
+                            Title = parsednode["title"],
+                            URL = parsednode["link"],
+                            Body = parsednode["description"],
+                            Stamp = DateTime.Parse(parsednode["pubDate"]),
+                            Source = Identifier,
+                            Hash = parsednode["title"].Hash()
+                        };
+                        Tick.Ticks.Add(tick);
                     }
-
-                    if (Error.Ticks.Find(x => x.Title == parsednode["title"]) is not null) continue;
-
-                    var tick = new Error()
-                    {
-                        Title = parsednode["title"],
-                        URL = parsednode["link"],
-                        Body = parsednode["description"],
-                        Stamp = DateTime.Parse(parsednode["pubDate"]),
-                        Source = Identifier,
-                    };
-                    Error.Ticks.Add(tick);
                 }
+            }
+            catch (Exception e)
+            {
+                DrawLog.LogError(e);
             }
         }
     }

@@ -20,7 +20,7 @@ namespace NewsTicker
         private static int windowX;
         private static int windowY;
 
-        public async static Task DrawLoop(BaseDraw InitialDraw)
+        public async static Task DrawLoop()
         {
             Enabled = true;
             Console.Clear();
@@ -28,7 +28,7 @@ namespace NewsTicker
             windowX = Console.WindowWidth;
             windowY = Console.WindowHeight;
 
-            CurrentDraw = InitialDraw;
+            //CurrentDraw = InitialDraw;
 
             while (KeepAlive)
             {
@@ -62,12 +62,13 @@ namespace NewsTicker
                 Line();
                 Write(new string('=', Console.BufferWidth - 1)); //separator
 
-                CurrentDraw.Draw();
+                CurrentDraw?.Draw();
             }
             catch (Exception e)
             {
                 /*Logger.Log("[RENDERER]", ConsoleColor.Red, "Crashed! {0}: {1}", e.Source, e.Message);
                 Logger.Log("[STACKTRACE]", ConsoleColor.DarkRed, e.StackTrace);*/
+                DrawLog.LogError(e);
             }
         }
 
@@ -98,8 +99,8 @@ namespace NewsTicker
 
             string output = string.Format(text, args);
 
-            int space = Console.BufferWidth - (Console.CursorLeft + 1);
-            if (output.Length > space) output = output.Substring(0, space - 4) + "...";
+            int space = Console.WindowWidth - (Console.CursorLeft + 1);
+            if (output.Length > space) output = output.Substring(0, (int)MathF.Max(space - 4,0)) + "...";
 
             Console.Write(output);
         }
@@ -112,8 +113,8 @@ namespace NewsTicker
 
             string output = string.Format(text, args);
 
-            int space = Console.BufferWidth - (Console.CursorLeft + 1);
-            if (output.Length > space) output = output.Substring(0, space - 4) + "...";
+            int space = Console.WindowWidth - (Console.CursorLeft + 1);
+            if (output.Length > space) output = output.Substring(0, (int)MathF.Max(space - 4, 0)) + "...";
 
             Console.Write(output);
         }

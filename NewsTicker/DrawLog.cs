@@ -17,7 +17,7 @@ namespace NewsTicker
             public DateTime when = DateTime.Now;
         }
 
-        public static List<Error> Errors = new List<Error>();
+        public static volatile List<Error> Errors = new List<Error>();
 
         public static void LogError(
             Exception e,
@@ -70,11 +70,13 @@ namespace NewsTicker
             if (orderedList.Count > 0)
             {
                 int start = Console.CursorTop + 1;
-                for (int i = 0; i < (Console.WindowHeight - start); i++)
+                int end = (Console.WindowHeight - start);
+                end = (int)MathF.Min(end, orderedList.Count);
+                for (int i = 0; i < end; i++)
                 {
                     Line();
                     Write("{0} {1}", ConsoleColor.Gray, orderedList[i].when.ToShortDateString(), orderedList[i].when.ToLongTimeString());
-                    WriteInvert(" [{0}]", ConsoleColor.Red, orderedList[i].exception.Source.Substring(0,(int)MathF.Min(orderedList[i].exception.Source.Length,20)));
+                    WriteInvert(" [{0}]", ConsoleColor.Red, orderedList[i].exception.Source);
                     Write(" {0}:", ConsoleColor.Red, orderedList[i].exception.Message.Replace("\n", ""));
                     Line();
                     WriteWrap(" {0}", ConsoleColor.White, orderedList[i].exception.StackTrace);
@@ -82,6 +84,13 @@ namespace NewsTicker
                     ClearFix();
                 }
             }
+        }
+
+        public override void OnBack()
+        {
+            DrawTicks.LastViewedErrorCount = Errors.Count;
+            Console.Clear();
+            Renderer.CurrentDraw = new DrawTicks();
         }
     }
 }

@@ -64,9 +64,9 @@ namespace NewsTicker
                     var title = node.SelectSingleNode(XPathTitle)?.InnerText ?? "";
                     var text = node.SelectSingleNode(XPathText)?.InnerText ?? "";
 
-                    if (Error.Ticks.Find(x => x.Body == text) is not null) continue;
+                    if (!(Tick.Ticks.Find(x => x.Hash == text.Hash()) is null)) continue;
 
-                    var tick = new Error()
+                    var tick = new Tick()
                     {
                         Title = title,
                         URL = WebSource,
@@ -74,7 +74,7 @@ namespace NewsTicker
                         Stamp = DateTime.Parse(node.SelectSingleNode(XPathTime)?.InnerText ?? DateTime.Now.ToString()),
                         Source = Identifier,
                     };
-                    Error.Ticks.Add(tick);
+                    Tick.Ticks.Add(tick);
                 }
             }
             catch (Exception e)

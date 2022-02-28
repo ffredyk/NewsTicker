@@ -18,7 +18,8 @@ namespace NewsTicker
             while (KeepAlive)
             {
                 var key = Console.ReadKey(true);
-                if(key.Key == ConsoleKey.Spacebar)
+                Renderer.CurrentDraw.OnKeyPress(key);
+                /*if(key.Key == ConsoleKey.Spacebar)
                 {
                     var oldview = Renderer.CurrentDraw;
                     Renderer.CurrentDraw = new DrawLog();
@@ -28,7 +29,7 @@ namespace NewsTicker
 
                     Renderer.CurrentDraw = oldview;
                     Console.Clear();
-                }
+                }*/
             }
         }
     }
