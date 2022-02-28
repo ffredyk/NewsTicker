@@ -122,6 +122,7 @@ namespace NewsTicker
                         {
                             href = content.DocumentNode.SelectSingleNode("//div");
                             parsednode["content"] = href.InnerText;
+                            title = node.ChildNodes[0].ChildNodes[0].InnerText;
                         }
                         else
                         {

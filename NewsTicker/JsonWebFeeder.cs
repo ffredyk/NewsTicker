@@ -59,7 +59,7 @@ namespace NewsTicker
                         Title = title,
                         URL = JsonSource,
                         Body = text,
-                        Stamp = DateTime.Parse(doc.DocumentNode.SelectSingleNode(XPathTime)?.InnerText ?? DateTime.Now.ToString()),
+                        Stamp = DateTime.Parse(doc.DocumentNode.SelectSingleNode(XPathTime).InnerText ?? DateTime.Now.ToString()),
                         Source = Identifier,
                         Hash = title.Hash()
                     };
