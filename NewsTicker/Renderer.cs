@@ -48,6 +48,7 @@ namespace NewsTicker
                 ResizeCheck();
                 //Clear();
                 Console.SetCursorPosition(0, 0);
+                Console.ResetColor();
                 if (clearer++ % 100 == 0) Console.Clear();
 
                 Write("NewsTicker (CZ edition) v{0}", ConsoleColor.White, Assembly.GetExecutingAssembly().GetName().Version.ToString());

@@ -87,6 +87,14 @@ namespace NewsTicker
                 Line();
                 Write(new string('-', Console.BufferWidth - 1)); //separator
 
+                if (CurrentSelection > 0)
+                {
+                    Line();
+                    WriteInvert(new string('^', Console.BufferWidth/2 - 2), ConsoleColor.DarkCyan);
+                    WriteInvert(" UP ", ConsoleColor.DarkCyan);
+                    WriteInvert(new string('^', Console.BufferWidth/2 - 2), ConsoleColor.DarkCyan);
+                }
+
                 if (orderedTicks.Count > 0)
                 {
                     int start = Console.CursorTop + 1;
@@ -94,12 +102,22 @@ namespace NewsTicker
                     end = (int)MathF.Min(end, orderedTicks.Count);
                     for (int i = CurrentSelection; i < end; i++)
                     {
-                        Line();
-                        Write("{0} {1}", ConsoleColor.Gray, orderedTicks[i].Stamp.ToShortDateString(), orderedTicks[i].Stamp.ToLongTimeString());
-                        Write(" [{0}]", ConsoleColor.Gray, orderedTicks[i].Source.Substring(0,(int)MathF.Min(orderedTicks[i].Source.Length,20)));
-                        Write(" {0}:", ConsoleColor.Red, orderedTicks[i].Title.Replace("\n", ""));
-                        if((Console.WindowWidth - Console.CursorLeft) >= 10) Write(" {0}", ConsoleColor.White, orderedTicks[i].Body.Replace("\n", ""));
-                        ClearFix();
+                        if (i + 1 == end && orderedTicks.Count > i)
+                        {
+                            Line();
+                            WriteInvert(new string('v', Console.BufferWidth / 2 - 3), ConsoleColor.DarkCyan);
+                            WriteInvert(" DOWN ", ConsoleColor.DarkCyan);
+                            WriteInvert(new string('v', Console.BufferWidth / 2 - 3), ConsoleColor.DarkCyan);
+                        }
+                        else
+                        {
+                            Line();
+                            Write("{0} {1}", ConsoleColor.Gray, orderedTicks[i].Stamp.ToShortDateString(), orderedTicks[i].Stamp.ToLongTimeString());
+                            Write(" [{0}]", ConsoleColor.Gray, orderedTicks[i].Source.Substring(0, (int)MathF.Min(orderedTicks[i].Source.Length, 20)));
+                            Write(" {0}:", ConsoleColor.Red, orderedTicks[i].Title.Replace("\n", ""));
+                            if ((Console.WindowWidth - Console.CursorLeft) >= 10) Write(" {0}", ConsoleColor.White, orderedTicks[i].Body.Replace("\n", ""));
+                            ClearFix();
+                        }
                     }
                 }
             }
@@ -107,6 +125,13 @@ namespace NewsTicker
             {
                 DrawLog.LogError(e);
             }
+        }
+
+        public override bool OnKeyPress(ConsoleKeyInfo key)
+        {
+            base.OnKeyPress(key);
+            Console.Clear();
+            return true;
         }
 
         public override void OnBack()

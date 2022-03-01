@@ -11,6 +11,7 @@ namespace NewsTicker
 
         static async Task Main(string[] args)
         {
+            Console.CursorVisible = false;
             Console.WriteLine("Hello World!");
 
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
